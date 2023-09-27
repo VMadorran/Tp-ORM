@@ -27,8 +27,36 @@ public class Categoria {
 
 	}
 
+	public Long idCategoria() {
+		return this.id;
+	}
+
 	public String infoCategoria() {
 		return this.nombre + this.codigoCategoria;
+	}
+
+	private Long getId() {
+		return id;
+	}
+
+	private void setId(Long id) {
+		this.id = id;
+	}
+
+	private String getNombre() {
+		return nombre;
+	}
+
+	private void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
+
+	private Long getCodigoCategoria() {
+		return codigoCategoria;
+	}
+
+	private void setCodigoCategoria(Long codigoCategoria) {
+		this.codigoCategoria = codigoCategoria;
 	}
 
 }

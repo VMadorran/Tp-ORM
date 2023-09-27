@@ -73,7 +73,7 @@ public class CategoriaServiceImplementacion implements CategoriaService {
 		EntityTransaction tx = em.getTransaction();
 		try {
 			tx.begin();
-			TypedQuery<Categoria> categoriasQuery = em.createQuery("Select c from categoria c", Categoria.class);
+			TypedQuery<Categoria> categoriasQuery = em.createQuery("Select c from Categoria c", Categoria.class);
 			categorias.addAll(categoriasQuery.getResultList());
 
 		} catch (Exception e) {

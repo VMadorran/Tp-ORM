@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ar.unrn.tp.api.ProductoService;
+import ar.unrn.tp.exception.CategoriaInvalidaException;
+import ar.unrn.tp.exception.DatoVacioException;
 import ar.unrn.tp.modelo.Categoria;
 import ar.unrn.tp.modelo.Producto;
 import ar.unrn.tp.servicios.ProductoServiceImplementacion;
@@ -41,7 +43,12 @@ public class ProductoServiceTest {
 			em.persist(categoria);
 		});
 
-		implementacion.crearProducto(1L, "Zapatillas", 10000, 1L, "Acme");
+		try {
+			implementacion.crearProducto(1L, "Zapatillas", 10000, 1L, "Acme");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		inTransactionExecute((em) -> {
 
@@ -70,7 +77,15 @@ public class ProductoServiceTest {
 			}
 		});
 
-		implementacion.modificarProducto(1L, "Camiseta", 1500, "Nope");
+		try {
+			implementacion.modificarProducto(1L, "Camiseta", 1500, "Nope", 1L);
+		} catch (DatoVacioException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CategoriaInvalidaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		inTransactionExecute((em) -> {
 

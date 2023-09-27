@@ -45,7 +45,12 @@ public class Carrito {
 		this.productosAComprar.addAll(productos);
 	}
 
-	public double calcularMontoDeCompra(Long nroTarjeta) {
+	public double calcularMontoDeCompra(Long nroTarjeta) throws TarjetaInvalidaException, CarritoVacioException {
+
+		if (!this.cliente.perteneceAlCliente(nroTarjeta))
+			throw new TarjetaInvalidaException("La tarjeta no pertece al cliente comprador");
+		if (this.estaVacio())
+			throw new CarritoVacioException("El carrito no posee productos para comprar");
 
 		double montoTotal = 0;
 

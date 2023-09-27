@@ -1,5 +1,7 @@
 package ar.unrn.tp.modelo;
 
+import ar.unrn.tp.exception.CategoriaInvalidaException;
+import ar.unrn.tp.exception.DatoVacioException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,15 +30,16 @@ public class Producto {
 	private String marca;
 
 	public Producto(String descripcion, Long codigo, Categoria categoria, double precio, String marca)
-			throws Exception {
+			throws DatoVacioException, CategoriaInvalidaException {
 
 		if (this.datoNulo(descripcion))
-			throw new Exception("dni no puede ser vacio");
+			throw new DatoVacioException("dni es un campo vacio");
 		if (this.datoNulo(categoria))
-			throw new Exception("La categoria no puede estar vacia");
+			throw new CategoriaInvalidaException("La categoria no puede estar vacia");
 		if (this.datoNulo(precio))
-			throw new Exception("El precio no debe ser vacio");
-
+			throw new DatoVacioException("El precio es un campo vacio");
+		if (this.datoNulo(marca))
+			throw new DatoVacioException("La marca es un campo vacio");
 		this.marca = marca;
 		this.descripcion = descripcion;
 		this.categoria = categoria;
@@ -63,10 +66,21 @@ public class Producto {
 		return this.marca;
 	}
 
-	public void modificarProducto(String descripcion, double precio, String marca) {
+	public void modificarProducto(String descripcion, double precio, String marca, Categoria categoria)
+			throws DatoVacioException, CategoriaInvalidaException {
+
+		if (this.datoNulo(descripcion))
+			throw new DatoVacioException("La descripcion esta vacia");
+		if (this.datoNulo(categoria))
+			throw new CategoriaInvalidaException("La categoria no puede estar vacia");
+		if (this.datoNulo(precio))
+			throw new DatoVacioException("El precio debe ser mayor a 0");
+		if (this.datoNulo(marca))
+			throw new DatoVacioException("La marca esta vacia");
 		this.descripcion = descripcion;
 		this.precio = precio;
 		this.marca = marca;
+		this.categoria = categoria;
 	}
 
 	public Long codigoProducto() {

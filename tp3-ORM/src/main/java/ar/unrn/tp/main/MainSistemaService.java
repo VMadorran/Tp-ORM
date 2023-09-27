@@ -2,9 +2,9 @@ package ar.unrn.tp.main;
 
 import java.util.List;
 
-import ar.unrn.tp.api.ClienteService;
-import ar.unrn.tp.modelo.Tarjeta;
-import ar.unrn.tp.servicios.ClienteServiceImplementacion;
+import ar.unrn.tp.api.CategoriaService;
+import ar.unrn.tp.modelo.Categoria;
+import ar.unrn.tp.servicios.CategoriaServiceImplementacion;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
@@ -15,8 +15,8 @@ public class MainSistemaService {
 		EntityManagerFactory emf = Persistence.createEntityManagerFactory("jpa-mysql");
 		// TODO Auto-generated method stub
 
-//		CategoriaService catService = new CategoriaServiceImplementacion();
-//		catService.categoriaService(consService);
+		CategoriaService catService = new CategoriaServiceImplementacion();
+		catService.CategoriaService(emf);
 //
 //		ProductoService productService = new ProductoServiceImplementacion();
 //		productService.productoService(consService);
@@ -47,13 +47,13 @@ public class MainSistemaService {
 //		DescuentoService descService = new DescuentoServiceImplementacion();
 //		descService.DescuentoService(emf);
 //
-		ClienteService clientService = new ClienteServiceImplementacion();
-		clientService.ClienteService(emf);
-		List<Tarjeta> tarjetas = clientService.listarTarjetas(1L);
-		emf.close();
-
-		System.out.println(tarjetas.get(0).marcaTarjeta());
-		System.out.println(tarjetas.get(1).marcaTarjeta());
+//		ClienteService clientService = new ClienteServiceImplementacion();
+//		clientService.ClienteService(emf);
+//		List<Tarjeta> tarjetas = clientService.listarTarjetas(1L);
+//		emf.close();
+//
+//		System.out.println(tarjetas.get(0).marcaTarjeta());
+//		System.out.println(tarjetas.get(1).marcaTarjeta());
 
 //		catService.crearCategoria(1L, "Indumentaria");
 //
@@ -74,6 +74,10 @@ public class MainSistemaService {
 //		List<Producto> productos = productService.listarProductos();
 //		System.out.println(productos.get(0).descripcion());
 //		System.out.println(productos.get(1).descripcion());
+
+		List<Categoria> categorias = catService.categorias();
+		System.out.println(categorias.get(0).infoCategoria());
+		emf.close();
 
 	}
 

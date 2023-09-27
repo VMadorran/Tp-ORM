@@ -13,9 +13,9 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
 import ar.unrn.tp.api.ClienteService;
@@ -47,6 +47,9 @@ public class VentaUI extends JFrame {
 	private JTable table;
 	private JTable productosTable;
 	private JTable tarjetasTable;
+	private JScrollPane scrollPane;
+	private JScrollPane scrollPane_1;
+	private JScrollPane scrollPane_2;
 
 	public VentaUI(EntityManagerFactory emf, ClienteService clientService, VentaService ventaService,
 			ProductoService producService, DescuentoService descService) {
@@ -61,12 +64,10 @@ public class VentaUI extends JFrame {
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		setBounds(100, 100, 525, 489);
+		setBounds(100, 100, 485, 489);
 		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 		setContentPane(contentPane);
-		contentPane.setLayout(null);
 
 		clientService.ClienteService(emf);
 
@@ -75,7 +76,7 @@ public class VentaUI extends JFrame {
 
 		DefaultTableModel modeloProductos;
 
-		String[] titulosProductos = { "Descripción", "Precio" };
+		String[] titulosProductos = { "Descripción", "Precio", "Id" };
 
 		modeloProductos = new DefaultTableModel(new Object[][] {}, titulosProductos);
 
@@ -83,83 +84,102 @@ public class VentaUI extends JFrame {
 		List<Producto> productosDeBase = producService.listarProductos();
 
 		clientService.ClienteService(emf);
-		List<Tarjeta> tarjetas = clientService.listarTarjetas(1L);
+		List<Tarjeta> tarjetasBase = clientService.listarTarjetas(1L);
 
 		descService.DescuentoService(emf);
 		List<Promocion> promociones = descService.listarDescuentos();
 
 		for (Producto producto : productosDeBase) {
-			modeloProductos.addRow(new Object[] { producto.descripcion(), producto.precioProducto() });
+			modeloProductos
+					.addRow(new Object[] { producto.descripcion(), producto.precioProducto(), producto.idProducto() });
 		}
 
-//		
 		DefaultTableModel modeloTarjetas;
 		String[] titulosTajetas = { "Marca", "Digito" };
 		modeloTarjetas = new DefaultTableModel(new Object[][] {}, titulosTajetas);
 
-		for (Tarjeta tarjeta : tarjetas) {
+		for (Tarjeta tarjeta : tarjetasBase) {
 
-			String num = tarjeta.nroTarjeta().toString();
-			modeloTarjetas.addRow(new Object[] { tarjeta.marcaTarjeta(), num.substring(3) });
+			modeloTarjetas.addRow(new Object[] { tarjeta.marcaTarjeta(), tarjeta.nroTarjeta() });
 		}
 
 		consultarPrecioButton = new JButton("Costo");
+		consultarPrecioButton.setBounds(141, 402, 89, 23);
 		consultarPrecioButton.setFont(new Font("Arial", Font.PLAIN, 12));
 		consultarPrecioButton.addActionListener(new ActionListener() {
 			float monto;
+			Long nroTarjeta = 0L;
 
 			public void actionPerformed(ActionEvent e) {
-				List<Long> productos = new ArrayList<>();
-				int[] seleccionados = productosTable.getSelectedRows();
-				for (int i : seleccionados) {
-					productos.add(productosDeBase.get(i).idProducto());
-				}
-				var tarjeta = tarjetas.get(tarjetasTable.getSelectedRow());
 
 				try {
-					ventaService.VentaService(emf);
-					monto = ventaService.calcularMonto(productos, tarjeta.nroTarjeta(), 1L);
+					List<Long> productos = new ArrayList<>();
 
-				} catch (Exception e1) {
+					int[] seleccionados = productosTable.getSelectedRows();
+					for (int i : seleccionados) {
+						productos.add(productosDeBase.get(i).idProducto());
+					}
+
+					int[] seleccionadas = tarjetasTable.getSelectedRows();
+					for (int i : seleccionadas) {
+						nroTarjeta = tarjetasBase.get(i).nroTarjeta();
+					}
+
+					ventaService.VentaService(emf);
+
+					monto = ventaService.calcularMonto(productos, nroTarjeta, 1L);
+					JOptionPane.showMessageDialog(null, "El precio de la compra es de: $" + monto);
+				} catch (DatoVacioException | CarritoVacioException | TarjetaInvalidaException e1) {
 					// TODO Auto-generated catch block
-					JOptionPane.showMessageDialog(null, e1.getMessage());
+					JOptionPane.showMessageDialog(null, e1.getMessage(), "Upps!", JOptionPane.ERROR_MESSAGE);
 					e1.printStackTrace();
 				}
-				JOptionPane.showMessageDialog(null, "El precio de la compra es de: " + monto);
+
 			}
 
 		});
-
-		consultarPrecioButton.setBounds(279, 393, 89, 23);
+		contentPane.setLayout(null);
 		contentPane.add(consultarPrecioButton);
 
 		comprarButton = new JButton("Comprar");
+		comprarButton.setBounds(305, 402, 89, 23);
 		comprarButton.setFont(new Font("Arial", Font.PLAIN, 12));
 		comprarButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ventaService.VentaService(emf);
-				List<Long> productos = new ArrayList<>();
-				int[] seleccionados = productosTable.getSelectedRows();
-				for (int i : seleccionados) {
-					productos.add(productosDeBase.get(i).idProducto());
-				}
-				var tarjeta = tarjetas.get(tarjetasTable.getSelectedRow());
-
-				float monto;
+				Long nroTarjeta = 0L;
 
 				try {
-					ventaService.realizarVenta(1L, productos, tarjeta.nroTarjeta());
+
+					List<Long> productos = new ArrayList<>();
+
+					int[] seleccionados = productosTable.getSelectedRows();
+					for (int i : seleccionados) {
+						productos.add(productosDeBase.get(i).idProducto());
+					}
+
+					int[] seleccionadas = tarjetasTable.getSelectedRows();
+					for (int i : seleccionadas) {
+						nroTarjeta = tarjetasBase.get(i).nroTarjeta();
+
+					}
+
+					ventaService.VentaService(emf);
+
+					ventaService.realizarVenta(1L, productos, nroTarjeta);
+					JOptionPane.showMessageDialog(null, "Usted ha realizado una compra!");
+
 				} catch (DatoVacioException | CarritoVacioException | TarjetaInvalidaException e1) {
 					// TODO Auto-generated catch block
-					JOptionPane.showMessageDialog(null, e1.getMessage());
+					JOptionPane.showMessageDialog(null, e1.getMessage(), "Upps!", JOptionPane.ERROR_MESSAGE);
 					e1.printStackTrace();
 				}
 
 			}
 		});
 
-		comprarButton.setBounds(137, 393, 89, 23);
 		contentPane.add(comprarButton);
+
+		String[] promo = { "Descripción" };
 
 		DefaultListModel descuentosListModel = new DefaultListModel();
 
@@ -167,51 +187,48 @@ public class VentaUI extends JFrame {
 			descuentosListModel.addElement(promocion.marca());
 
 		}
-		JList descuentosList = new JList();
-		descuentosList.setFont(new Font("Arial", Font.PLAIN, 12));
-
-		descuentosList.setBounds(279, 235, 195, 130);
-		contentPane.add(descuentosList);
-
-		descuentosList.setModel(descuentosListModel);
 
 		JLabel lblNewLabel = new JLabel("Descuentos\r\n Disponibles");
+		lblNewLabel.setBounds(304, 198, 143, 38);
 		lblNewLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-		lblNewLabel.setBounds(290, 198, 143, 38);
 		contentPane.add(lblNewLabel);
 
 		JLabel lblTarjetas = new JLabel("Tarjetas");
+		lblTarjetas.setBounds(348, 40, 46, 14);
 		lblTarjetas.setFont(new Font("Arial", Font.PLAIN, 12));
-		lblTarjetas.setBounds(338, 33, 46, 14);
 		contentPane.add(lblTarjetas);
 
 		JLabel lblProductos = new JLabel("Productos");
+		lblProductos.setBounds(113, 57, 71, 14);
 		lblProductos.setFont(new Font("Arial", Font.PLAIN, 12));
-		lblProductos.setBounds(108, 31, 71, 14);
 		contentPane.add(lblProductos);
 
-		table = new JTable();
-		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Descripci\u00F3n", "Precio" }));
-		table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		table.setCellSelectionEnabled(true);
-		table.setBounds(38, 251, 111, -180);
-		contentPane.add(table);
+		scrollPane = new JScrollPane();
+		scrollPane.setBounds(21, 102, 261, 245);
+		contentPane.add(scrollPane);
 
 		productosTable = new JTable();
+		scrollPane.setViewportView(productosTable);
 		productosTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		productosTable.setModel(modeloProductos);
-		productosTable.setBounds(29, 68, 223, 215);
-		contentPane.add(productosTable);
+
+		scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBounds(301, 79, 146, 100);
+		contentPane.add(scrollPane_1);
 
 		tarjetasTable = new JTable();
+		scrollPane_1.setViewportView(tarjetasTable);
 		tarjetasTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tarjetasTable.setModel(modeloTarjetas);
-		tarjetasTable.setBounds(304, 68, 146, 119);
-		contentPane.add(tarjetasTable);
 
+		scrollPane_2 = new JScrollPane();
+		scrollPane_2.setBounds(305, 247, 136, 111);
+		contentPane.add(scrollPane_2);
+		JList descuentosList = new JList();
+		scrollPane_2.setViewportView(descuentosList);
+		descuentosList.setFont(new Font("Arial", Font.PLAIN, 12));
+
+		descuentosList.setModel(descuentosListModel);
 	}
 
-	public boolean cerrar(boolean cierre) {
-		return cierre;
-	}
 }

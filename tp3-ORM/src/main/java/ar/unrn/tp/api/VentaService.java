@@ -22,7 +22,8 @@ public interface VentaService {
 
 	// Devuelve el monto total aplicando los descuentos al día de la fecha
 	// validar que no llegue una lista vacía y la tarjeta exista
-	float calcularMonto(List<Long> productos, Long idTarjeta, Long idCliente) throws Exception, DatoVacioException;
+	float calcularMonto(List<Long> productos, Long idTarjeta, Long idCliente)
+			throws DatoVacioException, TarjetaInvalidaException, CarritoVacioException;
 
 	// Devuelve todas las ventas realizadas
 	List<Venta> ventas();

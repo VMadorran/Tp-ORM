@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ar.unrn.tp.api.ProductoService;
+import ar.unrn.tp.exception.CategoriaInvalidaException;
+import ar.unrn.tp.exception.DatoVacioException;
 import ar.unrn.tp.modelo.Categoria;
 import ar.unrn.tp.modelo.Producto;
 import jakarta.persistence.EntityManager;
@@ -22,7 +24,8 @@ public class ProductoServiceImplementacion implements ProductoService {
 	}
 
 	@Override
-	public void crearProducto(Long codigo, String descripcion, double precio, Long idCategoria, String marca) {
+	public void crearProducto(Long codigo, String descripcion, double precio, Long idCategoria, String marca)
+			throws Exception {
 
 		EntityManager em = this.emf.createEntityManager();
 		EntityTransaction tx = em.getTransaction();
@@ -37,7 +40,7 @@ public class ProductoServiceImplementacion implements ProductoService {
 
 		} catch (Exception e) {
 			tx.rollback();
-//			throw e;
+			throw e;
 		} finally {
 			if (em != null && em.isOpen())
 				em.close();
@@ -45,27 +48,29 @@ public class ProductoServiceImplementacion implements ProductoService {
 	}
 
 	@Override
-	public void modificarProducto(Long idProducto, String descripcion, double precio, String marca) {
+	public void modificarProducto(Long idProducto, String descripcion, double precio, String marca, Long idCategoria)
+			throws DatoVacioException, CategoriaInvalidaException {
 
 		EntityManager em = this.emf.createEntityManager();
 		EntityTransaction tx = em.getTransaction();
 		try {
 			tx.begin();
 
-			Producto producto = em.getReference(Producto.class, idProducto);
+			Categoria categoria = em.find(Categoria.class, idCategoria);
+			Producto producto = em.find(Producto.class, idProducto);
 
-			producto.modificarProducto(descripcion, precio, marca);
+			producto.modificarProducto(descripcion, precio, marca, categoria);
 			em.persist(producto);
-
 			tx.commit();
 
 		} catch (Exception e) {
 			tx.rollback();
-//				throw e;
+			throw e;
 		} finally {
 			if (em != null && em.isOpen())
 				em.close();
 		}
+
 	}
 
 	@Override
@@ -83,13 +88,23 @@ public class ProductoServiceImplementacion implements ProductoService {
 
 		} catch (Exception e) {
 			tx.rollback();
-//			throw e;
+			throw e;
 		} finally {
 			if (em != null && em.isOpen())
 				em.close();
 		}
 
 		return productos;
+	}
+
+	private boolean datoNulo(String dato) {
+
+		return dato.equals("");
+	}
+
+	private boolean datoNulo(double dato) {
+
+		return dato == 0;
 	}
 
 }

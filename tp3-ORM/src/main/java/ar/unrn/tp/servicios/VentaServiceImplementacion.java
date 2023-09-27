@@ -38,10 +38,6 @@ public class VentaServiceImplementacion implements VentaService {
 
 		if (idCliente == 0)
 			throw new DatoVacioException("El cliente debe ser válido");
-		if (productos.isEmpty())
-			throw new DatoVacioException("La lista de productos está vacia");
-		if (idTarjeta == 0)
-			throw new DatoVacioException("La tarjeta debe tener un numero válido");
 
 		EntityManager em = this.emf.createEntityManager();
 		EntityTransaction tx = em.getTransaction();
@@ -69,7 +65,7 @@ public class VentaServiceImplementacion implements VentaService {
 
 		} catch (Exception e) {
 			tx.rollback();
-//			throw e;
+			throw e;
 		} finally {
 			if (em != null && em.isOpen())
 				em.close();
@@ -79,14 +75,11 @@ public class VentaServiceImplementacion implements VentaService {
 
 	@Override
 	public float calcularMonto(List<Long> productos, Long idTarjeta, Long idCliente)
-			throws Exception, DatoVacioException {
+			throws DatoVacioException, CarritoVacioException, TarjetaInvalidaException {
 
 		if (idCliente == 0)
 			throw new DatoVacioException("El cliente debe ser válido");
-		if (productos.isEmpty())
-			throw new DatoVacioException("La lista de productos está vacia");
-		if (idTarjeta == 0)
-			throw new DatoVacioException("La tarjeta debe tener un numero válido");
+
 		ArrayList<Producto> productosCompra = new ArrayList<>();
 
 		EntityManager em = this.emf.createEntityManager();
@@ -108,7 +101,6 @@ public class VentaServiceImplementacion implements VentaService {
 			carrito.actualizarPromociones(this.promocionesMarca(), this.promocionBancaria());
 
 			monto = (float) carrito.calcularMontoDeCompra(idTarjeta);
-
 			tx.commit();
 
 		} catch (Exception e) {
